@@ -71,6 +71,7 @@ function generate_be() {
    LOG_LEVEL=info $generator_dir/go-archetype transform --transformations $tf \
       --source=$template_dir \
       --destination=${project_name} \
+      -- \
       --project_name ${project_name} \
       --project_team ${project_team} \
       --project_repo_path ${project_repo_path} \
@@ -80,7 +81,7 @@ function generate_be() {
       --include_pubsub $use_pubsub \
       --include_email $use_email \
       --include_gcs $use_gcs \
-      --include_example $use_example
+      --include_example $use_example \
       --include_example_cron $use_example_cron
 
    rm -rf ${temp_dir}
