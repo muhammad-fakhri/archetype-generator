@@ -1,0 +1,21 @@
+project:
+  name: new-service-be
+  team: team-name
+  type: be
+  repo_path: github.com/your-username/new-service-be
+
+service:
+  example: yes
+  example_cron: yes
+  db_sql: no
+  redis: no
+  gcs: no
+  pubsub: no
+  db_mongo: no
+  email: no
+
+config:
+  # osx or linux
+  env: osx
+  # archetype-be git branch
+  src: master

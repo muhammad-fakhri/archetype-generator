@@ -1,0 +1,6 @@
+.tmp
+.DS_Store
+dist/
+coverage.txt
+.idea/
+*be*

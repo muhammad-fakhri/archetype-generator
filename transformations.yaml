@@ -1,0 +1,148 @@
+ignore:
+  - .git/
+  - transformations.yaml
+  - .tmp/
+  - .gopath/
+inputs:
+  - id: project_name
+    text: What is the project name? (e.g. my-awesome-go-project)
+    type: text
+  - id: project_repo_path
+    text: What is the project repo path, without the project name? (e.g. github.com/your-username/new-service-be)
+    type: text
+  - id: project_team
+    text: What is your team?
+    type: text
+  - id: include_db_sql
+    text: Should db sql functionality be included?
+    type: yesno
+  - id: include_redis
+    text: Should redis functionality be included?
+    type: yesno
+  - id: include_pubsub
+    text: Should pubsub functionality be included?
+    type: yesno
+  - id: include_gcs
+    text: Should gcs functionality be included?
+    type: yesno
+  - id: include_db_mongo
+    text: Should db_mongo functionality be included?
+    type: yesno
+  - id: include_email
+    text: Should email functionality be included?
+    type: yesno
+  - id: include_example
+    text: Should example functionality be included?
+    type: yesno
+  - id: include_example_cron
+    text: Should cron example functionality be included?
+    type: yesno
+
+before:
+  operations:
+    - sh:
+      - rm -rf {{.destination}}
+transformations:
+  - name: project path
+    type: replace
+    pattern: github.com/muhammad-fakhri/archetype-be
+    replacement: "{{ .project_repo_path }}"
+    files: ["**"]
+  - name: project name
+    type: replace
+    pattern: archetype-be
+    replacement: "{{ .project_name }}"
+    files: ["**"]
+  - name: do not include template code in the final output
+    type: include
+    region_marker: __DO_NOT_INCLUDE__
+    condition: false
+    files: ["**"]
+  - name: include db sql - whole files
+    type: include
+    region_marker:
+    condition: .include_db_sql
+    files: ["**/system_config*", "**/db.go", "**/**.sql"]
+  - name: include db sql - functionality
+    type: include
+    region_marker: __INCLUDE_DB_SQL__
+    condition: .include_db_sql
+    files: ["**"]
+  - name: include redis - whole files
+    type: include
+    region_marker:
+    condition: .include_redis
+    files: ["**/cacheutil/*", "**/redis.go", "**/ratelimiter/*", "**/ratelimiter.go", "**/lock/*", "**/lock.go"]
+  - name: include redis - functionality
+    type: include
+    region_marker: __INCLUDE_REDIS__
+    condition: .include_redis
+    files: ["**"]
+  - name: include gcs - whole files
+    type: include
+    region_marker:
+    condition: .include_gcs
+    files: ["**/storage.go","**/storage/*"]
+  - name: include gcs - functionality
+    type: include
+    region_marker: __INCLUDE_GCS__
+    condition: .include_gcs
+    files: ["**"]
+  - name: include mongo - whole files
+    type: include
+    region_marker:
+    condition: .include_db_mongo
+    files: ["**/mongodb.go"]
+  - name: include gcs - functionality
+    type: include
+    region_marker: __INCLUDE_DB_MONGO__
+    condition: .include_db_mongo
+    files: ["**"]
+  - name: include pubsub - whole files
+    type: include
+    region_marker:
+    condition: .include_pubsub
+    files: ["**/pubsub.go","**/pubsub/*","**/subscriber/*","**/subscriber/handler/*"]
+  - name: include pubsub - functionality
+    type: include
+    region_marker: __INCLUDE_PUBSUB__
+    condition: .include_pubsub
+    files: ["**"]
+  - name: include email - whole files
+    type: include
+    region_marker:
+    condition: .include_email
+    files: ["**email**"]
+  - name: include email - functionality
+    type: include
+    region_marker: __INCLUDE_EMAIL__
+    condition: .include_email
+    files: ["**"]
+  - name: include example - whole files
+    type: include
+    region_marker:
+    condition: .include_example
+    files: ["**/example**"]
+  - name: include example - functionality
+    type: include
+    region_marker: __INCLUDE_EXAMPLE__
+    condition: .include_example
+    files: ["**"]
+  - name: include example cron - whole files
+    type: include
+    region_marker:
+    condition: .include_example_cron
+    files: ["**/cronexample**"]
+  - name: include example cron - functionality
+    type: include
+    region_marker: __INCLUDE_EXAMPLE_CRON__
+    condition: .include_example_cron
+    files: ["**"]
+after:
+  operations:
+    - sh:
+      - cd {{.destination}} && gofmt -s -w .
+      - cd {{.destination}} && goimports -w .
+      - cd {{.destination}} && mv manifest/archetype-be manifest/{{.project_name}}
+      - cd {{.destination}} && ./script/generate_mock.sh
+      - cd {{.destination}} && go mod tidy
